@@ -1,8 +1,10 @@
-# CamundaRails
-Short description and motivation.
+# camunda_rails
+Easy integration between Rails and Camunda Platform
+
+WIP
 
 ## Usage
-How to use my plugin.
+`rspec spec`
 
 ## Installation
 Add this line to your application's Gemfile:
