@@ -1,9 +1,5 @@
-module CamundaRails
-  module Delegates
-    class ExternalTaskOne
-      def execute(external_task)
-
-      end
-    end
+class ExternalTaskOne < CamundaRails::ExternalTaskDelegate
+  execute do |task, params|
+    binding.pry
   end
 end

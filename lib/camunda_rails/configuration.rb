@@ -1,17 +1,19 @@
 module CamundaRails
   class Configuration
-    @@external_tasks = {}
+    class << self
+      attr_accessor :external_tasks
+    end
     attr_accessor :engine_rest_url
 
     def subscribe_to(topic_name, klass=nil)
-      binding.pry
-      @@external_tasks[topic_name.to_s] = (klass_name || get_class(topic_name))
+      self.class.external_tasks ||= {}
+      self.class.external_tasks[topic_name.to_s] = (klass || get_class(topic_name))
     end
 
     private
 
     def get_class(topic_name)
-      "CamundaRails::Delegates::#{topic_name.camelize}".constantize
+      "#{topic_name.camelize}".constantize
     end
   end
 end
