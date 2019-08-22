@@ -1,10 +1,24 @@
 module CamundaRails
   class ExternalTask < ApplicationRecord
-    def self.fetch
-      # não é assim q faz
-      # usar o fetchAndLock direto
-      CamundaRails::Configuration.external_tasks.keys.each do |key|
-        tasks = Camunda::ExternalTask.get("?topicName=#{key}")
+
+    after_create  :enqueue_task
+
+    def self.fetch_and_lock
+      CamundaRails::Configuration.external_tasks.each do |external_task|
+        topic_vars = {
+          "topicName" => external_task.topic_name,
+          "lockDuration" => external_task.lock_duration,
+          "deserializeValues" => true,
+        }
+        lock_vars = {
+          "workerId" => Configuration.worker_id,
+          "maxTasks" => external_task.max_tasks,
+          "usePriority" => external_task.priority,
+          "topics" => [topic_vars]
+        }
+
+        response = Camunda::ExternalTask.post("fetchAndLock", nil, lock_vars.to_json)
+        tasks = JSON.parse(response.body)
         tasks.each do |task|
           camunda_id = task['id']
           attrs = task.to_a
@@ -17,22 +31,28 @@ module CamundaRails
       end
     end
 
-    before_create :lock_task
-    after_create :enqueue_task
+    def expired?
+      lock_expiration_time.to_date < DateTime.now
+    end
+
+    def complete!
+      update(state: 'completed')
+      obj = {"workerId" => worker_id, "variables" => result_variables}
+      response = Camunda::ExternalTask.post("#{camunda_id}/complete", nil, obj.to_json)
+    end
 
     private
 
-    def lock_task
-      # TODO: https://docs.camunda.org/manual/7.6/reference/rest/external-task/fetch/
-    end
-
-    def complete
-      #TODO: https://docs.camunda.org/manual/7.6/reference/rest/external-task/post-complete/
-    end
-
     def enqueue_task
       update(state: 'enqueued')
-      CamundaRails::Configuration.external_tasks[topic_name].perform_now(self.id)
+      job_class = config.use_class
+      job_class.perform_now(id)
+    end
+
+    def config
+      CamundaRails::Configuration.external_tasks
+        .select{|s| s.topic_name==topic_name}
+        .first
     end
   end
 end

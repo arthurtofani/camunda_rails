@@ -19,6 +19,8 @@ class CreateCamundaRailsExternalTasks < ActiveRecord::Migration[5.2]
       t.string :worker_id
       t.string :priority
       t.string :topic_name
+      t.json :variables
+      t.json :result_variables
 
       t.timestamps
     end

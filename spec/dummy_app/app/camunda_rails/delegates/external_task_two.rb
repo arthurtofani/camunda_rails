@@ -1,5 +1,5 @@
-class ExternalTaskTwo
-  def execute(external_task)
-
+class ExternalTaskTwo < CamundaRails::ExternalTaskDelegate
+  execute do |task|
+    puts "daee"
   end
 end

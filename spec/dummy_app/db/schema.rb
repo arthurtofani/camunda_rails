@@ -14,7 +14,7 @@ ActiveRecord::Schema.define(version: 2019_08_19_234342) do
 
   create_table "camunda_rails_external_tasks", force: :cascade do |t|
     t.string "camunda_id"
-    t.string "state"
+    t.string "state", default: "new"
     t.string "activity_id"
     t.string "activity_instance_id"
     t.string "error_message"
@@ -31,6 +31,8 @@ ActiveRecord::Schema.define(version: 2019_08_19_234342) do
     t.string "worker_id"
     t.string "priority"
     t.string "topic_name"
+    t.json "variables"
+    t.json "result_variables"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

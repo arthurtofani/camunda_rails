@@ -1,5 +1,5 @@
 class ExternalTaskOne < CamundaRails::ExternalTaskDelegate
-  execute do |task, params|
-    binding.pry
+  execute do |task|
+    puts "okok"
   end
 end
