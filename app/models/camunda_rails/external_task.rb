@@ -37,11 +37,17 @@ module CamundaRails
 
     def complete!
       update(state: 'completed')
-      obj = {"workerId" => worker_id, "variables" => result_variables}
+      vars = variables.map{|s| change_var(s[0], s[1])}.to_h
+      obj = {"workerId" => worker_id, "variables" => vars}
       response = Camunda::ExternalTask.post("#{camunda_id}/complete", nil, obj.to_json)
     end
 
     private
+
+    def change_var(key, obj)
+      obj["value"] = result_variables[key]
+      [key, obj]
+    end
 
     def enqueue_task
       update(state: 'enqueued')

@@ -25,11 +25,21 @@ module CamundaRails
     def execute_task(external_task, dt)
       ActiveRecord::Base.transaction do
         @sleep_thread = Thread.new{ sleep(dt); raise ActiveRecord::Rollback }
-        self.class.execute_block.call(external_task)
+        result = self.class.execute_block.call(external_task, vars(external_task))
+        external_task.update(result_variables: result)
         @sleep_thread.kill
       end
       external_task.complete!
     end
+
+    def vars(external_task)
+      external_task.variables
+                   .to_a
+                   .map{|s| [s[0], s[1]["value"]] }
+                   .to_h
+    end
+
+
 
   end
 end

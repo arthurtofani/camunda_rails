@@ -1,5 +1,5 @@
 class ExternalTaskTwo < CamundaRails::ExternalTaskDelegate
-  execute do |task|
-    puts "daee"
+  execute do |task, vars|
+    vars
   end
 end
